@@ -1,3 +1,22 @@
+function calNextArrival(firstTrainTime, frequency) {
+    var currentime = moment()
+    var FirstTrainFormatted = moment(firstTrainTime, 'HH:mm').format('X');
+    var timedifference = currentime.diff(moment.unix(FirstTrainFormatted), "minutes");
+    var timeLeft = timedifference % frequency;
+    var mins = moment(frequency - timeLeft, "mm").format('mm');
+    var nextTrain = currentime.add(mins, "m").format("hh:mm A");
+    return nextTrain
+}
+function calMinutesAway(firstTrainTime, frequency) {
+    var currentime = moment()
+    var FirstTrainFormatted = moment(firstTrainTime, 'HH:mm').format('X');
+    var timedifference = currentime.diff(moment.unix(FirstTrainFormatted), "minutes");
+    var timeLeft = timedifference % frequency;
+    var mins = moment(frequency - timeLeft, "mm").format('mm');
+    console.log(mins);
+    return mins
+}
+
 $(document).ready(function () {
     //firebase setup
     var config = {
@@ -11,7 +30,8 @@ $(document).ready(function () {
     firebase.initializeApp(config);
     var database = firebase.database();
 
-    var test
+    // var nextTrain
+    // var minutes
 
     $(".submit").on("click", function (event) {
         event.preventDefault();
@@ -33,23 +53,20 @@ $(document).ready(function () {
     database.ref().orderByChild("dateAdded").on("child_added", function (snapshot) {
         var sv = snapshot.val();
 
-
+        var nextArrival = calNextArrival(sv.firstTrain, sv.frequency);
+        var minutes = calMinutesAway(sv.firstTrain, sv.frequency);
         var myTD = `<tr>
         <td>${sv.name}</td>
         <td>${sv.destination}</td>
              <td>${sv.frequency}</td>
-             <td>${test}</td>
-             <td>${test}</td></tr>`
+             <td>${nextArrival}</td>
+             <td>${minutes}</td></tr>`
         $("tbody").append(myTD);
-    },
-    
-    
 
-    
+    },
+
+
     )
 
-
-
-    
 });
 
