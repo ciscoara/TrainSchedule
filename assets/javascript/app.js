@@ -11,7 +11,6 @@ $(document).ready(function () {
     firebase.initializeApp(config);
     var database = firebase.database();
 
-    //var monthsWorkd = "test"
     var nextArrival
     var minutesAway
 
@@ -31,28 +30,38 @@ $(document).ready(function () {
         })
 
     })
-
+    
     database.ref().orderByChild("dateAdded").on("child_added", function (snapshot) {
         var sv = snapshot.val();
 
-        
-        nextArrival = moment(sv.startTime).format("LT")
-        console.log(startTime);
+
+        //Next time is the the combination of startTime with frequency.. comparing with the current time
+        nextArrival = nextTime(snapshot.val().startTime, snapshot.val().frequency);
+        minutesAway = moment(nextArrival, "mm").fromNow(true);  
 
 
         //template literals
         var myTD = `<tr>
         <td>${sv.name}</td>
         <td>${sv.destination}</td>
-             <td>${frequency}</td>
+             <td>${sv.frequency}</td>
              <td>${nextArrival}</td>
              <td>${minutesAway}</td></tr>`
         $("tbody").append(myTD);
     })
 
 
-
-
-
-
 });
+function nextTime(startTime, frequency) {
+    nextArrival = moment(startTime, "HH:mm").format('LT');
+    console.log(nextArrival);
+    if (moment().isBefore(nextArrival)) {
+        console.log(`time is in the past ${moment()}`);
+        return nextArrival;
+    } else {
+        while (moment().isAfter(nextArrival)) {
+            nextArrival = nextArrival.add(frequency, "m");
+        }
+    }
+    return nextArrival;
+}
